@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +16,41 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Define roles
+        $roles = ['Admin', 'Vendor', 'Customer'];
+        foreach ($roles as $role) {
+            Role::create([
+                'name' => $role,
+                'slug' => Str::slug($role),
+                'created_at' => now(),
+            ]);
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create admin
+        $admin = new User();
+        $admin->name = 'Admin';
+        $admin->email = 'admin@admin.com';
+        $admin->password = Hash::make('admin');
+        $admin->created_at = now();
+
+        $admin->save();
+
+        $adminRole = Role::where('slug', 'admin')->first();
+        $admin->roles()->attach($adminRole);
+
+        // Create vendor
+        $vendor = new User();
+        $vendor->name = 'Vendor';
+        $vendor->email = 'vendor@vendor.com';
+        $vendor->password = Hash::make('vendor');
+        $vendor->created_at = now();
+
+        $vendor->save();
+
+        $vendorRole = Role::where('slug', 'vendor')->first();
+        $vendor->roles()->attach($vendorRole);
+
+        // Create customers
+        User::factory(15)->create();
     }
 }
